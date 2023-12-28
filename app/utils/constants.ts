@@ -1,5 +1,6 @@
 import { Network } from "@injectivelabs/networks";
 import { ChainId, EthereumChainId } from "@injectivelabs/ts-types";
+import BigNumber from "bignumber.js";
 
 export const IS_PRODUCTION: boolean = import.meta.env.PROD as boolean;
 export const IS_DEVELOPMENT: boolean = !IS_PRODUCTION;
@@ -31,3 +32,10 @@ export const IS_TESTNET: Boolean = [
 
 export const COUNTER_CONTRACT_ADDRESS =
   "inj1t8rhq5vcxqgw68ldg0k2mjxjvzshuah6tnugvy";
+
+
+export const UI_DEFAULT_MIN_DISPLAY_DECIMALS = 2
+
+export const UI_MINIMAL_AMOUNT = new BigNumber(1).shiftedBy(
+    -UI_DEFAULT_MIN_DISPLAY_DECIMALS
+)

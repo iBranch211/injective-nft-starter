@@ -95,6 +95,7 @@ function handleSetCount() {
           View Contract on Explorer
         </a>
       </div>
+      <div class="fixed inset-0 z-50 h-full w-full duration-300 ease-in backdrop-filter backdrop-blur bg-gray-900 bg-opacity-90 max-sm:z-40 hidden"></div>
     </Card>
   </Container>
 </template>

@@ -1,7 +1,7 @@
 <script setup>
 import { useWalletStore } from "~~/store/wallet";
 import {useModalStore} from "~/store/modal";
-import {Modal, WalletConnectStatus, WalletModalType} from "~/types";
+import {BusEvents, Modal, WalletConnectStatus, WalletModalType} from "~/types";
 import {Status, StatusType} from "@injectivelabs/utils";
 
 const modalStore = useModalStore()
@@ -36,13 +36,28 @@ function onCloseModal() {
   modalStore.closeModal(Modal.Connect)
 }
 
+onMounted(() => {
+  useEventBus(BusEvents.ShowLedgerConnect).on(connectLedger)
+
+  Promise.all([
+    walletStore.isMetamaskInstalled(),
+    walletStore.isTrustWalletInstalled()
+  ]).finally(() => status.setIdle())
+})
+
+function connectLedger() {
+  walletModalType.value = WalletModalType.Ledger
+
+  modalStore.openModal(Modal.Connect)
+}
+
 </script>
 
 <template>
-  <Button v-if="walletStore.injectiveAddress">{{ injAddressShort }}</Button>
+  <LayoutWalletDetails v-if="walletStore.isUserWalletConnected" />
   <Button
-    v-else
     @click="handleClick"
+    class="bg-blue-500 text-blue-900 font-semibold whitespace-nowrap"
   >
     Connect Wallet
   </Button>
@@ -63,6 +78,7 @@ function onCloseModal() {
     <ul
         class="divide-y divide-gray-800 border-gray-700 rounded-lg max-h-[65vh]"
     >
+      <LayoutWalletConnectWalletMetamask/>
     </ul>
   </AppModal>
 </template>

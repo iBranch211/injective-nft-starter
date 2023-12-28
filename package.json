@@ -1,13 +1,13 @@
 {
   "private": true,
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "start": "nuxt start",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "prepare": "nuxt prepare",
-    "analyze": "nuxt analyze",
+    "build": "nuxi build",
+    "dev": "nuxi dev",
+    "start": "nuxi start",
+    "generate": "nuxi generate",
+    "preview": "nuxi preview",
+    "prepare": "nuxi prepare",
+    "analyze": "nuxi analyze",
     "clean-up": "rm -rf dist && rm -rf .output && rm -rf .nuxt && rm -rf ./node_modules/.cache/nuxt && rm -rf ./node_modules/.vite"
   },
   "devDependencies": {

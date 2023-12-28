@@ -1,4 +1,4 @@
-import { WalletStrategy } from "@injectivelabs/wallet-ts";
+import {Wallet, WalletStrategy} from "@injectivelabs/wallet-ts";
 import { Web3Exception } from "@injectivelabs/exceptions";
 import {
   CHAIN_ID,
@@ -16,14 +16,43 @@ export const walletStrategy = new WalletStrategy({
   },
 });
 
+
+export const connect = ({
+                          wallet
+                        }: {
+  wallet: Wallet
+  // onAccountChangeCallback?: (account: string) => void,
+}) => {
+  walletStrategy.setWallet(wallet)
+}
+
 export const getAddresses = async (): Promise<string[]> => {
-  const addresses = await walletStrategy.getAddresses();
+  const addresses = await walletStrategy.getAddresses()
 
   if (addresses.length === 0) {
-    throw new Web3Exception(
-      new Error("There are no addresses linked in this wallet.")
-    );
+    throw new WalletException(
+        new Error('There are no addresses linked in this wallet.'),
+        {
+          code: UnspecifiedErrorCode,
+          type: ErrorType.WalletError
+        }
+    )
   }
 
-  return addresses;
-};
+  if (!addresses.every((address) => !!address)) {
+    throw new WalletException(
+        new Error('There are no addresses linked in this wallet.'),
+        {
+          code: UnspecifiedErrorCode,
+          type: ErrorType.WalletError
+        }
+    )
+  }
+
+
+  return addresses
+}
+
+export const confirm = async (address: string) => {
+  return await walletStrategy.confirm(address)
+}

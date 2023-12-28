@@ -3,6 +3,13 @@ import viteConfig from "./nuxt-config/vite";
 
 export default defineNuxtConfig({
     ssr: false,
+    builder:'vite',
+
+    typescript: {
+        typeCheck: true
+    },
+
+    css: ['@/assets/css/tailwind.css'],
 
     hooks: {
         ...nitroConfigHook,
@@ -18,8 +25,6 @@ export default defineNuxtConfig({
     typescript: {
         typeCheck: "build",
     },
-
-    css: ['@/assets/css/tailwind.css'],
 
     sourcemap: {
         server: false,
