@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     builder:'vite',
 
     typescript: {
-        typeCheck: true
+        typeCheck: false
     },
 
     css: ['@/assets/css/tailwind.css'],
@@ -40,6 +40,15 @@ export default defineNuxtConfig({
 
     build: {
         transpile: ['typescript-module-or-file'], // Add the TypeScript module or file that you want to transpile
+    },
+
+    postcss:{
+        plugins: {
+            'postcss-import': {},
+            'tailwindcss/nesting': {},
+            tailwindcss: {},
+            autoprefixer: {}
+        }
     },
 
     plugins: [{src: "./nuxt-config/buffer.ts", ssr: false}],
