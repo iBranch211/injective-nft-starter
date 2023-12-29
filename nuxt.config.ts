@@ -22,9 +22,6 @@ export default defineNuxtConfig({
         "@vueuse/nuxt"
     ],
 
-    typescript: {
-        typeCheck: "build",
-    },
 
     sourcemap: {
         server: false,
@@ -40,6 +37,10 @@ export default defineNuxtConfig({
     },
 
     vite: viteConfig,
+
+    build: {
+        transpile: ['typescript-module-or-file'], // Add the TypeScript module or file that you want to transpile
+    },
 
     plugins: [{src: "./nuxt-config/buffer.ts", ssr: false}],
 });

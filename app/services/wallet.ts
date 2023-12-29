@@ -11,7 +11,6 @@ export const walletStrategy = new WalletStrategy({
   chainId: CHAIN_ID,
   ethereumOptions: {
     ethereumChainId: ETHEREUM_CHAIN_ID,
-    wsRpcUrl: alchemyWsRpcEndpoint,
     rpcUrl: alchemyRpcEndpoint,
   },
 });
