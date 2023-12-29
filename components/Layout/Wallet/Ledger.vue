@@ -1,22 +1,21 @@
 <script lang="ts" setup>
 import { Status, StatusType } from '@injectivelabs/utils'
-import { BaseDropdownOption } from '@injectivelabs/ui-shared/lib/types'
 import { LedgerDerivationPathType, Wallet } from '@injectivelabs/wallet-ts'
 import { getEthereumAddress } from '@injectivelabs/sdk-ts'
 import { WalletConnectStatus } from '@/types'
+import type {BaseDropdownOption} from "@injectivelabs/ui-shared/lib/types";
 
 const walletStore = useWalletStore()
 const { $onError } = useNuxtApp()
-const { t } = useLang()
 const { handleSubmit } = useForm()
 
 const options = [
   {
-    display: t('connect.ledgerLive'),
+    display: 'Ledger Live',
     value: LedgerDerivationPathType.LedgerLive
   },
   {
-    display: t('connect.ledgerLegacy'),
+    display: 'Ledger Legacy',
     value: LedgerDerivationPathType.LedgerMew
   }
 ] as BaseDropdownOption[]
@@ -81,34 +80,34 @@ const connect = handleSubmit(() => {
 <template>
   <div>
     <p class="text-sm font-semibold mb-2">
-      {{ $t('connect.derivationPath') }}
+      Derivation Path
     </p>
     <AppSelectField
-      v-model="path"
-      :options="options"
-      :placeholder="$t('connect.selectDerivationPath')"
+        v-model="path"
+        :options="options"
+        placeholder="$t('connect.selectDerivationPath')"
     />
 
     <p
-      v-if="fetchStatus.isLoading()"
-      class="text-gray-400 text-xs my-2 flex items-center gap-2"
+        v-if="fetchStatus.isLoading()"
+        class="text-gray-400 text-xs my-2 flex items-center gap-2"
     >
       <AppSpinner is-sm />
       <span>
-        {{ $t('connect.getAddressNote') }}
+        We are getting your addresses, please wait ...
       </span>
     </p>
 
     <div
-      v-else
-      class="flex items-center gap-1 text-blue-500 hover:text-opacity-80 cursor-pointer text-sm mt-2"
-      @click="fetchAddresses"
+        v-else
+        class="flex items-center gap-1 text-blue-500 hover:text-opacity-80 cursor-pointer text-sm mt-2"
+        @click="fetchAddresses"
     >
       <span>
         {{
           walletStore.addresses.length === 0
-            ? $t('connect.getAddresses')
-            : $t('connect.getMoreAddresses')
+              ? 'Get addresses'
+              : 'Get more addresses'
         }}
       </span>
       <BaseIcon name="arrow" class="rotate-180 w-4 h-4" />
@@ -118,41 +117,41 @@ const connect = handleSubmit(() => {
 
     <div v-if="walletStore.addresses.length > 0">
       <p class="text-sm font-semibold mb-2">
-        {{ $t('connect.address') }}
+        Address
       </p>
 
       <AppSelectField
-        v-model="address"
-        is-searchable
-        :options="
+          v-model="address"
+          is-searchable
+          :options="
           walletStore.addresses.map((address: string) => ({
             display: address,
             value: address
           }))
         "
-        :placeholder="$t('connect.selectAddressToConnect')"
+          placeholder="Select address to connect"
       />
 
       <p
-        v-if="addressErrors.length > 0"
-        class="text-red-500 text-sm capitalize-phrase mt-1"
+          v-if="addressErrors.length > 0"
+          class="text-red-500 text-sm capitalize-phrase mt-1"
       >
         {{ addressErrors[0] }}
       </p>
 
       <AppButton
-        class="w-full mt-4 text-blue-900 bg-blue-500 font-semibold"
-        :is-disabled="addressErrors.length > 0"
-        :is-loading="status.isLoading()"
-        is-lg
-        @click="connect"
+          class="w-full mt-4 text-blue-900 bg-blue-500 font-semibold"
+          :is-disabled="addressErrors.length > 0"
+          :is-loading="status.isLoading()"
+          is-lg
+          @click="connect"
       >
-        {{ $t('connect.connect') }}
+       Connect
       </AppButton>
     </div>
 
     <p class="text-xs text-gray-400 mt-4">
-      {{ $t('connect.connectUsingLedgerNote') }}
+      Connect Using Ledger Notes
     </p>
   </div>
 </template>

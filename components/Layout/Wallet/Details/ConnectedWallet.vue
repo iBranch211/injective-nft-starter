@@ -32,12 +32,12 @@ function onToggleDropdown() {
 
 function onCopyAddress() {
   copy(walletStore.address)
-  success({ title: 'Copied Address' })
+  success({ title: 'Copied address to your clipboard !' })
 }
 
 function onCopyInjectiveAddress() {
   copy(walletStore.injectiveAddress)
-  success({ title:'Copied Address'})
+  success({ title:'Copied address to your clipboard !'})
 }
 
 function openQrCodeModal() {
@@ -55,7 +55,7 @@ function openQrCodeModal() {
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <AssetQrCode
+        <AssetQRCode
           class="hover:text-blue-500 h-4 w-4"
           @click="openQrCodeModal"
         />

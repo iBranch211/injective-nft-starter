@@ -1,6 +1,4 @@
 <script setup>
-import { useWalletStore } from "~~/store/wallet";
-import {useModalStore} from "~/store/modal";
 import {BusEvents, Modal, WalletConnectStatus, WalletModalType} from "~/types";
 import {Status, StatusType} from "@injectivelabs/utils";
 
@@ -19,11 +17,11 @@ const isLoading = computed(
 )
 
 const injAddressShort = computed(
-  () =>
-    `${walletStore.injectiveAddress.slice(
-      0,
-      6
-    )}...${walletStore.injectiveAddress.slice(-3)}`
+    () =>
+        `${walletStore.injectiveAddress.slice(
+            0,
+            6
+        )}...${walletStore.injectiveAddress.slice(-3)}`
 );
 
 function handleClick() {
@@ -51,13 +49,35 @@ function connectLedger() {
   modalStore.openModal(Modal.Connect)
 }
 
+function onWalletModalTypeChange(type) {
+  walletModalType.value = type
+}
+
+watch(
+    () => walletStore.walletConnectStatus,
+    (newWalletConnectStatus) => {
+      if (newWalletConnectStatus === WalletConnectStatus.connected) {
+        modalStore.closeModal(Modal.Connect)
+        modalStore.openPersistedModalIfExist()
+      }
+    }
+)
+
+watch(isModalOpen, (newShowModalState) => {
+  if (!newShowModalState) {
+    onCloseModal()
+    walletModalType.value = WalletModalType.All
+  }
+})
+
 </script>
 
 <template>
-  <LayoutWalletDetails v-if="walletStore.isUserWalletConnected" />
+  <LayoutWalletDetails v-if="walletStore.isUserWalletConnected"/>
   <Button
-    @click="handleClick"
-    class="bg-blue-500 text-blue-900 font-semibold whitespace-nowrap"
+      v-else
+      @click="handleClick"
+      class="bg-blue-500 text-blue-900 font-mono tracking-wide font-bold text-lg whitespace-nowrap"
   >
     Connect Wallet
   </Button>
@@ -70,15 +90,32 @@ function connectLedger() {
       @modal:closed="onCloseModal"
   >
     <template #title>
-      <h3>
+      <h3 v-if="walletModalType === WalletModalType.Trezor">
+        Connect Using Trezor
+      </h3>
+      <h3 v-else-if="walletModalType === WalletModalType.Ledger">
+        Connect Using Ledger
+      </h3>
+      <h3 v-else>
         Connect To Wallet
       </h3>
     </template>
 
+    <LayoutWalletLedger v-if="walletModalType === WalletModalType.Ledger"/>
+    <LayoutWalletTrezor v-else-if="walletModalType === WalletModalType.Trezor"/>
     <ul
+        v-else
         class="divide-y divide-gray-800 border-gray-700 rounded-lg max-h-[65vh]"
     >
       <LayoutWalletConnectWalletMetamask/>
+      <LayoutWalletConnectWalletKeplr/>
+      <LayoutWalletConnectWalletNinji/>
+      <LayoutWalletConnectWalletLedger @click="onWalletModalTypeChange"/>
+      <LayoutWalletConnectWalletTrezor @click="onWalletModalTypeChange"/>
+      <LayoutWalletConnectWalletTrustWallet/>
+      <LayoutWalletConnectWalletLeap/>
+      <LayoutWalletConnectWalletCosmostation/>
+      <LayoutWalletConnectWalletTorus/>
     </ul>
   </AppModal>
 </template>

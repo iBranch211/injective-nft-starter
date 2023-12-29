@@ -11,9 +11,9 @@ const style = computed(() => `transform: scaleX(${props.value / 100})`)
 
 <template>
   <div class="w-full flex flex-col items-end">
-    <span class="text-gray-200 mb-1">{{ value }}%</span>
-    <div class="w-full h-2 rounded bg-gray-700 overflow-hidden">
-      <div class="w-full h-2 bg-white origin-top-left" :style="style" />
+<!--    <span class="text-gray-200 mb-1">{{ value }}%</span>-->
+    <div class="w-full h-3.5 rounded-2xl bg-gray-400 overflow-hidden">
+      <div class="w-full h-3.5 bg-blue-600 origin-top-left" :style="style" />
     </div>
   </div>
 </template>

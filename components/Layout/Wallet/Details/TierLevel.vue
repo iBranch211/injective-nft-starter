@@ -8,7 +8,7 @@
     </span>
 
     <NuxtLink
-      :to="{ name: 'fee-discounts' }"
+      :to="{ name: 'index' }"
       class="text-green-500 hover:opacity-80 flex items-center gap-2"
     >
       <span>

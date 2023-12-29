@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
 import {
   connect,
-  getAddresses
+  getAddresses, walletStrategy
 } from "@/app/services/wallet";
-import { getInjectiveAddress } from "@injectivelabs/sdk-ts";
+import {getDefaultSubaccountId, getEthereumAddress, getInjectiveAddress} from "@injectivelabs/sdk-ts";
 import {Wallet} from "@injectivelabs/wallet-ts";
 import {BusEvents, GrantDirection, WalletConnectStatus} from "~/types";
 import {isTrustWalletInstalled} from "~/app/services/trust-wallet";
 import {isMetamaskInstalled} from "~/app/services/metamask";
+import {confirmCorrectKeplrAddress} from "~/app/services/cosmos";
 
 
 type WalletStoreState = {
@@ -94,7 +95,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const addresses = await getAddresses()
       const [address] = addresses
-      const addressConfirmation = await confirm(address)
+      const addressConfirmation = await walletStrategy.confirm(address)
       const injectiveAddress = getInjectiveAddress(address)
 
       walletStore.$patch({
@@ -115,7 +116,6 @@ export const useWalletStore = defineStore("wallet", {
         metamaskInstalled: await isMetamaskInstalled()
       })
     },
-
 
     async onConnect() {
       // const accountStore = useAccountStore()
@@ -140,12 +140,154 @@ export const useWalletStore = defineStore("wallet", {
       })
     },
 
-
     async isTrustWalletInstalled() {
       const walletStore = useWalletStore()
 
       walletStore.$patch({
         trustWalletInstalled: await isTrustWalletInstalled()
+      })
+    },
+
+    reset() {
+      const walletStore = useWalletStore()
+
+      const {
+        address,
+        addresses,
+        injectiveAddress,
+        defaultSubaccountId,
+        addressConfirmation
+      } = initialStateFactory()
+
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        defaultSubaccountId,
+        addressConfirmation
+      })
+    },
+
+    async connectCosmostation() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.Cosmostation)
+
+      const injectiveAddresses = await getAddresses()
+      const [injectiveAddress] = injectiveAddresses
+      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const ethereumAddress = getEthereumAddress(injectiveAddress)
+
+      walletStore.$patch({
+        injectiveAddress,
+        addressConfirmation,
+        address: ethereumAddress,
+        addresses: injectiveAddresses,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectKeplr() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.Keplr)
+
+      const injectiveAddresses = await getAddresses()
+      const [injectiveAddress] = injectiveAddresses
+      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const ethereumAddress = getEthereumAddress(injectiveAddress)
+
+      await confirmCorrectKeplrAddress(injectiveAddress)
+
+      walletStore.$patch({
+        injectiveAddress,
+        addressConfirmation,
+        address: ethereumAddress,
+        addresses: injectiveAddresses,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectLeap() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.Leap)
+
+      const injectiveAddresses = await getAddresses()
+      const [injectiveAddress] = injectiveAddresses
+      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const ethereumAddress = getEthereumAddress(injectiveAddress)
+
+      walletStore.$patch({
+        injectiveAddress,
+        addressConfirmation,
+        address: ethereumAddress,
+        addresses: injectiveAddresses,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectNinji() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.Ninji)
+
+      const injectiveAddresses = await getAddresses()
+      const [injectiveAddress] = injectiveAddresses
+      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const ethereumAddress = getEthereumAddress(injectiveAddress)
+
+      walletStore.$patch({
+        injectiveAddress,
+        addressConfirmation,
+        address: ethereumAddress,
+        addresses: injectiveAddresses,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectTrustWallet() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.TrustWallet)
+
+      const addresses = await getAddresses()
+      const [address] = addresses
+      const addressConfirmation = await walletStrategy.confirm(address)
+      const injectiveAddress = getInjectiveAddress(address)
+
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        addressConfirmation,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async disconnect() {
+      const walletStore = useWalletStore()
+
+      await walletStrategy.disconnect()
+
+      walletStore.reset()
+    },
+
+    setWalletConnectStatus(walletConnectStatus: WalletConnectStatus) {
+      const walletStore = useWalletStore()
+
+      walletStore.$patch({
+        walletConnectStatus
       })
     },
 

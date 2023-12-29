@@ -1,26 +1,14 @@
-/* Works on Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: theme('colors.gray.700') theme('colors.gray.800');
+@-webkit-keyframes rotation {
+  0%, 30%   {-webkit-transform: scale(1);}
+  30%, 60% {-webkit-transform: scale(1.05);}
+  60%, 100% {-webkit-transform: scale(1);}
 }
-
-/* Works on Chrome, Edge, and Safari */
-*::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+@keyframes rotation {
+  0%, 30%   {-webkit-transform: scale(1);}
+  30%, 60% {-webkit-transform: scale(1.05);}
+  60%, 100% {-webkit-transform: scale(1);}
 }
-
-*::-webkit-scrollbar-track {
-  background: theme('colors.gray.900');
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: theme('colors.gray.800');
-  border-radius: 20px;
-  border: 2px solid theme('colors.gray.900');
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  width: 0 !important;
-  height: 0 !important;
+img.nft {
+  -webkit-animation: rotation 6s infinite running;
+  animation: rotation 6s infinite running;
 }

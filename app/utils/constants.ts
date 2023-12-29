@@ -1,6 +1,7 @@
 import { Network } from "@injectivelabs/networks";
 import { ChainId, EthereumChainId } from "@injectivelabs/ts-types";
-import BigNumber from "bignumber.js";
+import { BigNumber } from '@injectivelabs/utils'
+export * from './setup'
 
 export const IS_PRODUCTION: boolean = import.meta.env.PROD as boolean;
 export const IS_DEVELOPMENT: boolean = !IS_PRODUCTION;

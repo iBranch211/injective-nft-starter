@@ -32,7 +32,7 @@ export default defineNuxtConfig({
     },
 
     imports: {
-        dirs: ["store/**"],
+        dirs: ['composables/**', 'store/*.ts', 'store/**/index.ts'],
     },
 
     pinia: {

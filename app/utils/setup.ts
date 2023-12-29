@@ -8,7 +8,7 @@ import {
 import { CW20_SWAP_CONTRACT_BY_NETWORK } from '@injectivelabs/sdk-ts'
 import { ChainId, EthereumChainId } from '@injectivelabs/ts-types'
 import { GeneralException } from '@injectivelabs/exceptions'
-import { getRoutes } from './routes'
+
 
 export const IS_DEVELOPMENT: boolean = process.env.NODE_ENV === 'development'
 export const IS_PRODUCTION: boolean = process.env.NODE_ENV === 'production'
@@ -190,7 +190,3 @@ export const PROXY_DETECTION_ENABLED = !!PROXY_DETECTION_API_KEY
 
 export const DEBUG_CALCULATION: boolean = env.VITE_DEBUG_CALCULATION === 'true'
 export const MAINTENANCE_ENABLED = env.VITE_MAINTENANCE_ENABLED === 'true'
-
-const { ROUTES, MARKETS_SLUGS } = getRoutes(NETWORK, env.VITE_ENV as string)
-
-export { ROUTES, MARKETS_SLUGS }

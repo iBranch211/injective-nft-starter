@@ -17,12 +17,12 @@ function showLedgerModal() {
     </template>
 
     <template #title>
-      {{ $t('connect.ledger') }}
+      Ledger
     </template>
 
     <template #description>
       <span data-cy="connect-wallet-popup-ledger-button">
-        {{ $t('connect.connectUsingHardware') }}
+        Connect using hardware
       </span>
     </template>
   </LayoutWalletConnectWrapper>

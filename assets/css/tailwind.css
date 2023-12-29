@@ -2,7 +2,10 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+@import './_scrollbar.css';
+@import './_root.css';
+
 body {
-  @apply bg-gray-300 text-black;
+  @apply bg-gray-900 text-white;
 }
 

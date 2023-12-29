@@ -5,7 +5,7 @@ import {
   CosmosWalletStrategy,
   getEndpointsFromChainId
 } from '@injectivelabs/wallet-ts'
-import { Token, IbcToken, TokenType } from '@injectivelabs/token-metadata'
+import { type Token, type IbcToken, TokenType } from '@injectivelabs/token-metadata'
 import {
   awaitForAll,
   BigNumberInWei,
@@ -22,10 +22,10 @@ import {
   CosmosWalletException
 } from '@injectivelabs/exceptions'
 import {
-  CosmosChannel,
+  type CosmosChannel,
   getGasPriceForChainId,
   cosmosChainTokenMetaMap,
-  BalanceWithTokenWithIbcBalance
+  type BalanceWithTokenWithIbcBalance
 } from '@injectivelabs/sdk-ui-ts'
 import {
   PublicKey,
@@ -41,7 +41,7 @@ import {
 } from '@injectivelabs/sdk-ts'
 import { channelIbcDenomToBaseDenomMap } from '@injectivelabs/token-metadata/dist/esm/ibc/channels'
 import { CHAIN_ID, ENDPOINTS } from '@/app/utils/constants'
-import { walletStrategy } from '@/app/wallet-strategy'
+import {walletStrategy} from "~/app/services/wallet";
 
 export const confirmCorrectKeplrAddress = async (injectiveAddress: string) => {
   // We only perform this check for Keplr addresses

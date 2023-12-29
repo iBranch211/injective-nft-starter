@@ -17,7 +17,7 @@ function disconnect() {
 </script>
 
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center bg-blue-500 text-white font-semibold whitespace-nowrap rounded-lg">
     <BaseHoverMenu
         popper-class="min-w-[310px] sm:min-w-[356px] bg-gray-850 shadow-dropdown rounded-lg"
     >
@@ -48,9 +48,7 @@ function disconnect() {
                   Disconnect
                 </span>
               </div>
-              <LayoutWalletDetailsConnectedWallet
-                  :wallet="walletStore.wallet"
-              />
+              <LayoutWalletDetailsConnectedWallet :wallet="walletStore.wallet"/>
             </div>
           </div>
         </div>

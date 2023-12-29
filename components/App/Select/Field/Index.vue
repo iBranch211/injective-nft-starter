@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { DropdownOptionWithToken } from '@/types'
+
+import type {DropdownOptionWithToken} from "~/types";
 
 const props = defineProps({
   isClearable: Boolean,
@@ -125,7 +126,7 @@ function handleClear() {
             class="text-white"
             is-sm
             is-bg-transparent
-            :placeholder="$t('common.search')"
+            placeholder="Search"
           />
 
           <div>

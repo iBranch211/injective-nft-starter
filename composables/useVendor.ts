@@ -1,4 +1,3 @@
-import { useI18n as useLang } from 'vue-i18n'
 import {
   useForm,
   useField,
@@ -12,7 +11,6 @@ import {
 
 export {
   useForm,
-  useLang,
   useField,
   useResetForm,
   useFormErrors,

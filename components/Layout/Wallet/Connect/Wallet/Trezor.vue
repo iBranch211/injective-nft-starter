@@ -17,12 +17,12 @@ function showTrezorModal() {
     </template>
 
     <template #title>
-      {{ $t('connect.trezor') }}
+      Trezor
     </template>
 
     <template #description>
       <span data-cy="connect-wallet-popup-trezor-button">
-        {{ $t('connect.connectUsingHardware') }}
+        Connect using hardware
       </span>
     </template>
   </LayoutWalletConnectWrapper>

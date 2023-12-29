@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Status, StatusType } from '@injectivelabs/utils'
-import { BaseDropdownOption } from '@injectivelabs/ui-shared/lib/types'
+import type { BaseDropdownOption } from '@injectivelabs/ui-shared/lib/types'
 import { Wallet } from '@injectivelabs/wallet-ts'
 import { getEthereumAddress } from '@injectivelabs/sdk-ts'
 import { WalletConnectStatus } from '@/types'
@@ -59,12 +59,12 @@ const connect = handleSubmit(() => {
 <template>
   <div>
     <p class="text-sm font-semibold mb-2">
-      {{ $t('connect.derivationPath') }}
+      Derivation Path
     </p>
     <AppSelectField
       v-model="wallet"
       :options="options"
-      :placeholder="$t('connect.wallet')"
+      placeholder="Wallet"
     />
 
     <p
@@ -73,7 +73,7 @@ const connect = handleSubmit(() => {
     >
       <AppSpinner is-sm />
       <span>
-        {{ $t('connect.getAddressNote') }}
+        We are getting your addresses, please wait ...
       </span>
     </p>
 
@@ -85,8 +85,8 @@ const connect = handleSubmit(() => {
       <span>
         {{
           walletStore.addresses.length === 0
-            ? $t('connect.getAddresses')
-            : $t('connect.getMoreAddresses')
+              ? 'Get addresses'
+              : 'Get more addresses'
         }}
       </span>
       <BaseIcon name="arrow" class="rotate-180 w-4 h-4" />
@@ -96,7 +96,7 @@ const connect = handleSubmit(() => {
 
     <div v-if="walletStore.addresses.length > 0">
       <p class="text-sm font-semibold mb-2">
-        {{ $t('connect.address') }}
+        Address
       </p>
 
       <AppSelectField
@@ -108,7 +108,7 @@ const connect = handleSubmit(() => {
             value: address
           }))
         "
-        :placeholder="$t('connect.selectAddressToConnect')"
+        placeholder="Select address to connect"
       />
 
       <p
@@ -125,12 +125,12 @@ const connect = handleSubmit(() => {
         is-lg
         @click="connect"
       >
-        {{ $t('connect.connect') }}
+        Connect
       </AppButton>
     </div>
 
     <p class="text-xs text-gray-400 mt-4">
-      {{ $t('connect.connectUsingTrezorNote') }}
+      Connect Using Trezor Notes
     </p>
   </div>
 </template>

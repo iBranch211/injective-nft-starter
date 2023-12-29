@@ -1,5 +1,5 @@
 import {Wallet, WalletStrategy} from "@injectivelabs/wallet-ts";
-import { Web3Exception } from "@injectivelabs/exceptions";
+import {ErrorType, UnspecifiedErrorCode, WalletException, Web3Exception} from "@injectivelabs/exceptions";
 import {
   CHAIN_ID,
   ETHEREUM_CHAIN_ID,

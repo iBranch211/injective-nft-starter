@@ -4,13 +4,12 @@ import { WalletConnectStatus } from '~/types'
 const walletStore = useWalletStore()
 const { success } = useNotifications()
 const { $onError } = useNuxtApp()
-const { t } = useLang()
 
 function connect() {
   walletStore
     .connectCosmostation()
     .then(() => {
-      success({ title: t('connect.successfullyConnected') })
+      success({ title: 'Successfully connected' })
     })
     .catch((e) => {
       walletStore.setWalletConnectStatus(WalletConnectStatus.disconnected)
@@ -26,12 +25,12 @@ function connect() {
     </template>
 
     <template #title>
-      {{ $t('connect.torus') }}
+      Torus
     </template>
 
     <template #description>
       <span data-cy="connect-wallet-popup-torus-button">
-        {{ $t('connect.connectUsingTorus') }}
+        Connect using torus
       </span>
     </template>
 

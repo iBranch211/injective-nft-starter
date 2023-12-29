@@ -11,7 +11,7 @@ export default defineConfig({
     plugins: [
         nodePolyfills({protocolImports: false}),
         AutoImport({
-            dirs: ['./composables', './store/', './store/**/index.ts'],
+            dirs: ['./composables', './store/**/index.ts'],
             imports: ['vue', '@vueuse/core']
         })
     ],
