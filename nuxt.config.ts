@@ -1,5 +1,5 @@
 import nitroConfigHook from "./nuxt-config/hooks/nitro";
-import viteConfig from "./nuxt-config/vite";
+import vite from "./nuxt-config/vite";
 
 export default defineNuxtConfig({
     ssr: false,
@@ -36,7 +36,8 @@ export default defineNuxtConfig({
         autoImports: ["defineStore"],
     },
 
-    vite: viteConfig,
+     vite,
+
 
     build: {
         transpile: ['typescript-module-or-file'], // Add the TypeScript module or file that you want to transpile
@@ -46,10 +47,7 @@ export default defineNuxtConfig({
         plugins: {
             'postcss-import': {},
             'tailwindcss/nesting': {},
-            tailwindcss: {},
-            autoprefixer: {}
         }
     },
 
-    plugins: [{src: "./nuxt-config/buffer.ts", ssr: false}],
 });
