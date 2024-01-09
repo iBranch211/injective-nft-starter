@@ -8,6 +8,8 @@ export const ENDPOINTS = getNetworkEndpoints(NETWORK);
 
 export const chainGrpcWasmApi = new ChainGrpcWasmApi(ENDPOINTS.grpc);
 
+console.log('walletStrategy',walletStrategy);
+console.log('network',NETWORK);
 export const msgBroadcastClient = new MsgBroadcaster({
   walletStrategy,
   network: NETWORK,

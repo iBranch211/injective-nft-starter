@@ -9,7 +9,7 @@ import {
 import { useWalletStore } from "./wallet";
 import { msgBroadcastClient } from "@/app/services";
 import { sleep } from "@injectivelabs/utils";
-import { backupPromiseCall } from "@/app/utils/index";
+import { backupPromiseCall } from "@/app/utils";
 
 export const useCounterStore = defineStore("counter", {
   state: () => ({
@@ -47,10 +47,13 @@ export const useCounterStore = defineStore("counter", {
         },
       });
 
+      console.log(msgBroadcastClient, msg);
+
       await msgBroadcastClient.broadcast({
         msgs: msg,
         injectiveAddress: walletStore.injectiveAddress,
       });
+
 
       await sleep(3000);
       await backupPromiseCall(() => counterStore.fetchCount());

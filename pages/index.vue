@@ -1,17 +1,44 @@
 <script setup lang="ts">
 
 
-import {useNotifications} from "#imports";
+import {useCounterStore, useNotifications} from "#imports";
+import {Status, StatusType} from "@injectivelabs/utils";
 
 const walletStore = useWalletStore()
+const counterStore=useCounterStore()
+const status = reactive(new Status(StatusType.Idle))
 
 const {error} = useNotifications()
+
+const mintCount=ref(0)
+
+onMounted(() => {
+  counterStore.fetchCount();
+});
+
+watch(
+    ()=>counterStore.count,
+    ()=>{
+      mintCount.value= counterStore.count
+    }
+)
 
 function handleMintClick(){
   if (!walletStore.isUserWalletConnected){
     error({title:'Please connect wallet'})
+    return
   }
+
+  status.setLoading()
+
+  counterStore
+      .incrementCount()
+      .catch(alert)
+      .finally(() => {
+        status.setIdle();
+      });
 }
+
 </script>
 
 <template>
@@ -59,11 +86,12 @@ function handleMintClick(){
             <div class="flex flex-col text-sm mt-3">
               <div class="flex justify-between mb-2 text-gray-400">
                 <div class="capitalize">total minted</div>
-                <div>30% (3/8)</div>
+                <div>{{ mintCount / 10 }}% ({{mintCount}}/1000)</div>
               </div>
-              <AppProgress :value="30"/>
+              <AppProgress :value="mintCount/10"/>
             </div>
             <Button
+                :disabled="status.isLoading()"
                 @click="handleMintClick"
                 class="capitalize bg-blue-500 text-blue-900 whitespace-nowrap mx-20 text-xl mt-10 tracking-widest"
             >
