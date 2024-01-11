@@ -1,19 +1,19 @@
-import {Wallet, WalletStrategy} from "@injectivelabs/wallet-ts";
-import {ErrorType, UnspecifiedErrorCode, WalletException} from "@injectivelabs/exceptions";
-import {alchemyRpcEndpoint, alchemyWsRpcEndpoint, CHAIN_ID, ETHEREUM_CHAIN_ID,} from "@/app/utils/constants";
+import { Wallet, WalletStrategy } from "@injectivelabs/wallet-ts";
+import { ErrorType, UnspecifiedErrorCode, WalletException } from "@injectivelabs/exceptions";
+import { alchemyRpcEndpoint, alchemyWsRpcEndpoint, CHAIN_ID, ETHEREUM_CHAIN_ID, } from "@/app/utils/constants";
 
 export const walletStrategy = new WalletStrategy({
     chainId: CHAIN_ID,
     ethereumOptions: {
         ethereumChainId: ETHEREUM_CHAIN_ID,
-        rpcUrl: alchemyRpcEndpoint,
+        // rpcUrl: alchemyRpcEndpoint,
     },
 });
 
 
 export const connect = ({
-                            wallet
-                        }: {
+    wallet
+}: {
     wallet: Wallet
     // onAccountChangeCallback?: (account: string) => void,
 }) => {

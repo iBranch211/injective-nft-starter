@@ -5,6 +5,7 @@ import {
   toBase64,
   fromBase64,
   MsgExecuteContractCompat,
+  msgsOrMsgExecMsgs,
 } from "@injectivelabs/sdk-ts";
 import { useWalletStore } from "./wallet";
 import { msgBroadcastClient } from "@/app/services";
@@ -38,7 +39,6 @@ export const useCounterStore = defineStore("counter", {
       if (!walletStore.injectiveAddress) {
         throw new Error("No Wallet Connected");
       }
-
       const msg = MsgExecuteContractCompat.fromJSON({
         contractAddress: COUNTER_CONTRACT_ADDRESS,
         sender: walletStore.injectiveAddress,
@@ -47,10 +47,12 @@ export const useCounterStore = defineStore("counter", {
         },
       });
 
-      console.log(msgBroadcastClient, msg);
+      const actualMessage = walletStore.isAuthzWalletConnected
+        ? msgsOrMsgExecMsgs(msg, walletStore.injectiveAddress)
+        : msg
 
       await msgBroadcastClient.broadcast({
-        msgs: msg,
+        msgs: actualMessage,
         injectiveAddress: walletStore.injectiveAddress,
       });
 
@@ -77,8 +79,12 @@ export const useCounterStore = defineStore("counter", {
         },
       });
 
+      const actualMessage = walletStore.isAuthzWalletConnected
+        ? msgsOrMsgExecMsgs(msg, walletStore.injectiveAddress)
+        : msg
+
       await msgBroadcastClient.broadcast({
-        msgs: msg,
+        msgs: actualMessage,
         injectiveAddress: walletStore.injectiveAddress,
       });
 

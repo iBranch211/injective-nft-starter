@@ -1,14 +1,18 @@
 import { defineStore } from "pinia";
 import {
+  confirm,
   connect,
   getAddresses, walletStrategy
 } from "@/app/services/wallet";
-import {getDefaultSubaccountId, getEthereumAddress, getInjectiveAddress} from "@injectivelabs/sdk-ts";
-import {Wallet} from "@injectivelabs/wallet-ts";
-import {BusEvents, GrantDirection, WalletConnectStatus} from "~/types";
-import {isTrustWalletInstalled} from "~/app/services/trust-wallet";
-import {isMetamaskInstalled} from "~/app/services/metamask";
-import {confirmCorrectKeplrAddress} from "~/app/services/cosmos";
+import { getDefaultSubaccountId, getEthereumAddress, getInjectiveAddress } from "@injectivelabs/sdk-ts";
+import { Wallet, isCosmosWallet, isEthWallet } from "@injectivelabs/wallet-ts";
+import { BusEvents, GrantDirection, WalletConnectStatus } from "~/types";
+import { isTrustWalletInstalled, validateTrustWallet } from "~/app/services/trust-wallet";
+import { isMetamaskInstalled, validateMetamask } from "~/app/services/metamask";
+import { confirmCorrectKeplrAddress, validateCosmosWallet } from "~/app/services/cosmos";
+import { useAuthZStore } from "./authZ";
+import { GeneralException } from "@injectivelabs/exceptions";
+import type { CosmosChainId } from "@injectivelabs/ts-types";
 
 
 type WalletStoreState = {
@@ -52,21 +56,50 @@ const initialStateFactory = (): WalletStoreState => ({
   }
 })
 
-export const useWalletStore = defineStore("wallet", {
-  state: (): WalletStoreState => initialStateFactory(),
 
-  getters:{
+export const useWalletStore = defineStore('wallet', {
+  state: (): WalletStoreState => initialStateFactory(),
+  getters: {
     isUserWalletConnected: (state) => {
       const addressConnectedAndConfirmed =
-          !!state.address && !!state.addressConfirmation
+        !!state.address && !!state.addressConfirmation
       const hasAddresses = state.addresses.length > 0
 
       return (
-          hasAddresses && addressConnectedAndConfirmed && !!state.injectiveAddress
+        hasAddresses && addressConnectedAndConfirmed && !!state.injectiveAddress
       )
     },
-  },
 
+    isAuthzWalletConnected: (state) => {
+      const addressConnectedAndConfirmed =
+        !!state.address && !!state.addressConfirmation
+      const hasAddresses = state.addresses.length > 0
+      const isUserWalletConnected =
+        hasAddresses && addressConnectedAndConfirmed && !!state.injectiveAddress
+
+      return (
+        isUserWalletConnected &&
+        !!state.authZ.address &&
+        !!state.authZ.injectiveAddress
+      )
+    },
+
+    isCosmosWallet: (state) => {
+      return isCosmosWallet(state.wallet)
+    },
+
+    authZOrInjectiveAddress: (state) => {
+      return state.authZ.injectiveAddress || state.injectiveAddress
+    },
+
+    authZOrDefaultSubaccountId: (state) => {
+      return state.authZ.defaultSubaccountId || state.defaultSubaccountId
+    },
+
+    authZOrAddress: (state) => {
+      return state.authZ.address || state.address
+    }
+  },
   actions: {
     async init() {
       const walletStore = useWalletStore()
@@ -74,10 +107,11 @@ export const useWalletStore = defineStore("wallet", {
       if (!walletStore.wallet) {
         return
       }
+
       await connect({ wallet: walletStore.wallet })
     },
 
-    async connectWallet(wallet : Wallet) {
+    async connectWallet(wallet: Wallet) {
       const walletStore = useWalletStore()
 
       walletStore.$patch({
@@ -88,14 +122,82 @@ export const useWalletStore = defineStore("wallet", {
       await connect({ wallet })
     },
 
-    async connectMetamask() {
+    connectAuthZ(
+      injectiveAddress: string,
+      direction: GrantDirection = GrantDirection.Granter
+    ) {
       const walletStore = useWalletStore()
 
-      await walletStore.connectWallet(Wallet.Metamask)
+      walletStore.$patch({
+        authZ: {
+          direction,
+          injectiveAddress,
+          address: getEthereumAddress(injectiveAddress),
+          defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+        }
+      })
+    },
 
-      const addresses = await getAddresses()
-      const [address] = addresses
-      const addressConfirmation = await walletStrategy.confirm(address)
+    async onConnect() {
+      const walletStore = useWalletStore()
+      const authZStore = useAuthZStore()
+
+      useEventBus(BusEvents.WalletConnected).emit()
+
+      await authZStore.fetchGrants()
+
+      walletStore.$patch({
+        walletConnectStatus: WalletConnectStatus.connected
+      })
+    },
+
+    async isMetamaskInstalled() {
+      const walletStore = useWalletStore()
+
+      walletStore.$patch({
+        metamaskInstalled: await isMetamaskInstalled()
+      })
+    },
+
+    async isTrustWalletInstalled() {
+      const walletStore = useWalletStore()
+
+      walletStore.$patch({
+        trustWalletInstalled: await isTrustWalletInstalled()
+      })
+    },
+
+    async getHWAddresses(wallet: Wallet) {
+      const walletStore = useWalletStore()
+
+      if (walletStore.addresses.length === 0 || walletStore.wallet !== wallet) {
+        await connect({ wallet })
+
+        const addresses = await getAddresses()
+        const injectiveAddresses = addresses.map(getInjectiveAddress)
+
+        walletStore.$patch({
+          wallet,
+          addresses: injectiveAddresses
+        })
+      } else {
+        const addresses = await getAddresses()
+        const injectiveAddresses = addresses.map(getInjectiveAddress)
+
+        walletStore.$patch({
+          wallet,
+          addresses: [...walletStore.addresses, ...injectiveAddresses]
+        })
+      }
+    },
+
+    async connectLedger(address: string) {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(walletStore.wallet)
+
+      const addresses = [address]
+      const addressConfirmation = await confirm(address)
       const injectiveAddress = getInjectiveAddress(address)
 
       walletStore.$patch({
@@ -109,80 +211,103 @@ export const useWalletStore = defineStore("wallet", {
       await walletStore.onConnect()
     },
 
-    async isMetamaskInstalled() {
+    async connectLedgerLegacy(address: string) {
       const walletStore = useWalletStore()
 
-      walletStore.$patch({
-        metamaskInstalled: await isMetamaskInstalled()
-      })
-    },
+      await walletStore.connectWallet(walletStore.wallet)
 
-    async onConnect() {
-      // const accountStore = useAccountStore()
-      const walletStore = useWalletStore()
-      // const authZStore = useAuthZStore()
-      // const exchangeStore = useExchangeStore()
-
-      useEventBus(BusEvents.WalletConnected).emit()
-
-      // await accountStore.fetchAccountPortfolio()
-      // await exchangeStore.initFeeDiscounts()
-      // await authZStore.fetchGrants()
-
-      // amplitudeWalletTracker.submitWalletConnectedTrackEvent({
-      //   wallet: walletStore.wallet,
-      //   address: walletStore.injectiveAddress,
-      //   tierLevel: exchangeStore.feeDiscountAccountInfo?.tierLevel || 0
-      // })
-
-      walletStore.$patch({
-        walletConnectStatus: WalletConnectStatus.connected
-      })
-    },
-
-    async isTrustWalletInstalled() {
-      const walletStore = useWalletStore()
-
-      walletStore.$patch({
-        trustWalletInstalled: await isTrustWalletInstalled()
-      })
-    },
-
-    reset() {
-      const walletStore = useWalletStore()
-
-      const {
-        address,
-        addresses,
-        injectiveAddress,
-        defaultSubaccountId,
-        addressConfirmation
-      } = initialStateFactory()
+      const addresses = [address]
+      const addressConfirmation = await confirm(address)
+      const injectiveAddress = getInjectiveAddress(address)
 
       walletStore.$patch({
         address,
         addresses,
-        injectiveAddress,
-        defaultSubaccountId,
-        addressConfirmation
-      })
-    },
-
-    async connectCosmostation() {
-      const walletStore = useWalletStore()
-
-      await walletStore.connectWallet(Wallet.Cosmostation)
-
-      const injectiveAddresses = await getAddresses()
-      const [injectiveAddress] = injectiveAddresses
-      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
-      const ethereumAddress = getEthereumAddress(injectiveAddress)
-
-      walletStore.$patch({
         injectiveAddress,
         addressConfirmation,
-        address: ethereumAddress,
-        addresses: injectiveAddresses,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectTrezor(address: string) {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(walletStore.wallet)
+
+      const addresses = [address]
+      const addressConfirmation = await confirm(address)
+      const injectiveAddress = getInjectiveAddress(address)
+
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        addressConfirmation,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectMetamask() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.Metamask)
+
+      const addresses = await getAddresses()
+      const [address] = addresses
+      const addressConfirmation = await confirm(address)
+      const injectiveAddress = getInjectiveAddress(address)
+
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        addressConfirmation,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectTrustWallet() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.TrustWallet)
+
+      const addresses = await getAddresses()
+      const [address] = addresses
+      const addressConfirmation = await confirm(address)
+      const injectiveAddress = getInjectiveAddress(address)
+
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        addressConfirmation,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectWalletConnect() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.WalletConnect)
+
+      const addresses = await getAddresses()
+      const [address] = addresses
+      const addressConfirmation = await confirm(address)
+      const injectiveAddress = getInjectiveAddress(address)
+
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        addressConfirmation,
         defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
       })
 
@@ -196,7 +321,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const injectiveAddresses = await getAddresses()
       const [injectiveAddress] = injectiveAddresses
-      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const addressConfirmation = await confirm(injectiveAddress)
       const ethereumAddress = getEthereumAddress(injectiveAddress)
 
       await confirmCorrectKeplrAddress(injectiveAddress)
@@ -219,7 +344,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const injectiveAddresses = await getAddresses()
       const [injectiveAddress] = injectiveAddresses
-      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const addressConfirmation = await confirm(injectiveAddress)
       const ethereumAddress = getEthereumAddress(injectiveAddress)
 
       walletStore.$patch({
@@ -240,7 +365,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const injectiveAddresses = await getAddresses()
       const [injectiveAddress] = injectiveAddresses
-      const addressConfirmation = await walletStrategy.confirm(injectiveAddress)
+      const addressConfirmation = await confirm(injectiveAddress)
       const ethereumAddress = getEthereumAddress(injectiveAddress)
 
       walletStore.$patch({
@@ -254,14 +379,35 @@ export const useWalletStore = defineStore("wallet", {
       await walletStore.onConnect()
     },
 
-    async connectTrustWallet() {
+    async connectCosmostation() {
       const walletStore = useWalletStore()
 
-      await walletStore.connectWallet(Wallet.TrustWallet)
+      await walletStore.connectWallet(Wallet.Cosmostation)
+
+      const injectiveAddresses = await getAddresses()
+      const [injectiveAddress] = injectiveAddresses
+      const addressConfirmation = await confirm(injectiveAddress)
+      const ethereumAddress = getEthereumAddress(injectiveAddress)
+
+      walletStore.$patch({
+        injectiveAddress,
+        addressConfirmation,
+        address: ethereumAddress,
+        addresses: injectiveAddresses,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
+    },
+
+    async connectTorus() {
+      const walletStore = useWalletStore()
+
+      await walletStore.connectWallet(Wallet.Torus)
 
       const addresses = await getAddresses()
       const [address] = addresses
-      const addressConfirmation = await walletStrategy.confirm(address)
+      const addressConfirmation = await confirm(address)
       const injectiveAddress = getInjectiveAddress(address)
 
       walletStore.$patch({
@@ -275,12 +421,23 @@ export const useWalletStore = defineStore("wallet", {
       await walletStore.onConnect()
     },
 
-    async disconnect() {
+    async connectAddress(injectiveAddress: string) {
       const walletStore = useWalletStore()
 
-      await walletStrategy.disconnect()
+      await walletStore.connectWallet(Wallet.Metamask)
 
-      walletStore.reset()
+      const addressConfirmation = await confirm(injectiveAddress)
+      const address = getEthereumAddress(injectiveAddress)
+
+      walletStore.$patch({
+        address,
+        addresses: [address],
+        injectiveAddress,
+        addressConfirmation,
+        defaultSubaccountId: getDefaultSubaccountId(injectiveAddress)
+      })
+
+      await walletStore.onConnect()
     },
 
     setWalletConnectStatus(walletConnectStatus: WalletConnectStatus) {
@@ -291,5 +448,89 @@ export const useWalletStore = defineStore("wallet", {
       })
     },
 
-  },
-});
+    setAddresses(addresses: string[]) {
+      const walletStore = useWalletStore()
+
+      walletStore.$patch({
+        addresses
+      })
+    },
+
+    // async validate() {
+    //   const appStore = useAppStore()
+    //   const walletStore = useWalletStore()
+
+    //   if (walletStore.wallet === Wallet.Metamask) {
+    //     await validateMetamask(walletStore.address, appStore.ethereumChainId)
+    //   }
+
+    //   if (walletStore.wallet === Wallet.TrustWallet) {
+    //     await validateTrustWallet(walletStore.address, appStore.ethereumChainId)
+    //   }
+
+    //   if (
+    //     isEthWallet(walletStore.wallet) &&
+    //     walletStore.isAuthzWalletConnected
+    //   ) {
+    //     throw new GeneralException(
+    //       new Error(
+    //         'Ethereum native wallets currently do not support AuthZ transactions'
+    //       )
+    //     )
+    //   }
+
+    //   if (isCosmosWallet(walletStore.wallet)) {
+    //     await validateCosmosWallet({
+    //       address: walletStore.injectiveAddress,
+    //       chainId: appStore.chainId as unknown as CosmosChainId,
+    //       wallet: walletStore.wallet
+    //     })
+    //   }
+    // },
+
+    async disconnect() {
+
+      const walletStore = useWalletStore()
+
+
+      await walletStrategy.disconnect()
+
+      walletStore.reset()
+
+    },
+
+    reset() {
+      const walletStore = useWalletStore()
+
+      const {
+        address,
+        addresses,
+        injectiveAddress,
+        defaultSubaccountId,
+        addressConfirmation
+      } = initialStateFactory()
+
+      walletStore.resetAuthZ()
+      walletStore.$patch({
+        address,
+        addresses,
+        injectiveAddress,
+        defaultSubaccountId,
+        addressConfirmation
+      })
+    },
+
+    resetAuthZ() {
+      const walletStore = useWalletStore()
+
+      walletStore.$patch({
+        authZ: {
+          address: '',
+          injectiveAddress: '',
+          defaultSubaccountId: '',
+          direction: GrantDirection.Grantee
+        }
+      })
+    }
+  }
+})
