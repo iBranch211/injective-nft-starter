@@ -42,21 +42,7 @@ function handleMintClick(){
 </script>
 
 <template>
-  <div class="bg-gray-800 text-white py-2">
-    <Container class="py-2 flex justify-between items-center max-w-full mx-4">
-      <div>
-        <img class="h-10 w-10 hidden sm:block" src="/assets/img/injective.png" alt="injective">
-      </div>
-      <div class="flex ">
-        <div class="flex items-center mr-5 gap-2">
-          <img class="h-4 w-4 hover:fill-blue-500" src="/assets/img/twitter.svg" alt="twitter">
-          <img class="h-6 w-6" src="/assets/img/discord.svg" alt="discord">
-        </div>
-        <ConnectWallet/>
-      </div>
-    </Container>
-  </div>
-  <Container class="grid place-items-center py-20">
+  <Container class="grid place-items-center flex-1">
     <div class="relative flex flex-col-reverse lg:flex-row justify-end">
       <div
           class="lg:absolute z-10 lg:left-0 lg:top-1/2 lg:transform lg:-translate-y-1/2 -mt-2 lg:mt-0 sm:px-5 lg:px-0 w-full lg:max-w-md ">
@@ -108,6 +94,6 @@ function handleMintClick(){
       </div>
     </div>
 
-
+    <div class="fixed inset-0 z-50 h-full w-full duration-300 ease-in backdrop-filter backdrop-blur bg-gray-900 bg-opacity-90 max-sm:z-40 hidden modal-container overflow-y-hidden  mx-auto sm:rounded-lg  max-sm:h-full max-sm:max-w-full max-sm:w-full md:min-w-lg md:max-w-lg lg:max-w-2xl max-h-screen sm:max-h-[90vh]"></div>
   </Container>
 </template>

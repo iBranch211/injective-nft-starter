@@ -26,6 +26,7 @@ export const IS_TESTNET: Boolean = [
 export const COUNTER_CONTRACT_ADDRESS =
   "inj1t8rhq5vcxqgw68ldg0k2mjxjvzshuah6tnugvy";
 
+export const Admin_Address="inj1wu3em28sedzdggqwrl72ll2nmemx2wzxzgvruw"
 
 
 
