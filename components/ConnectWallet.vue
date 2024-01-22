@@ -1,7 +1,7 @@
 <script setup>
-import {BusEvents, Modal, WalletConnectStatus, WalletModalType} from "~/types";
-import {Status, StatusType} from "@injectivelabs/utils";
-import {Admin_Address} from "~/app/utils/constants";
+import { BusEvents, Modal, WalletConnectStatus, WalletModalType } from "~/types";
+import { Status, StatusType } from "@injectivelabs/utils";
+import { Admin_Address } from "~/app/utils/constants";
 
 const modalStore = useModalStore()
 const walletStore = useWalletStore();
@@ -13,19 +13,19 @@ const walletModalType = ref(WalletModalType.All)
 const router = useRouter()
 
 const isModalOpen = computed(
-    () => modalStore.modals[Modal.Connect]
+  () => modalStore.modals[Modal.Connect]
 )
 
 const isLoading = computed(
-    () => walletStore.walletConnectStatus === WalletConnectStatus.connecting
+  () => walletStore.walletConnectStatus === WalletConnectStatus.connecting
 )
 
 const injAddressShort = computed(
-    () =>
-        `${walletStore.injectiveAddress.slice(
-            0,
-            6
-        )}...${walletStore.injectiveAddress.slice(-3)}`
+  () =>
+    `${walletStore.injectiveAddress.slice(
+      0,
+      6
+    )}...${walletStore.injectiveAddress.slice(-3)}`
 );
 
 function handleClick() {
@@ -56,18 +56,17 @@ function onWalletModalTypeChange(type) {
 }
 
 watch(
-    () => walletStore.walletConnectStatus,
-    (newWalletConnectStatus) => {
-      if (newWalletConnectStatus === WalletConnectStatus.connected) {
-        if (walletStore.injectiveAddress === Admin_Address) {
-          console.log(walletStore.injectiveAddress)
-          router.push("/admin")
-        }
-
-        modalStore.closeModal(Modal.Connect)
-        modalStore.openPersistedModalIfExist()
+  () => walletStore.walletConnectStatus,
+  (newWalletConnectStatus) => {
+    if (newWalletConnectStatus === WalletConnectStatus.connected) {
+      if (walletStore.injectiveAddress === Admin_Address) {
+        router.push("/admin")
       }
+
+      modalStore.closeModal(Modal.Connect)
+      modalStore.openPersistedModalIfExist()
     }
+  }
 )
 
 watch(isModalOpen, (newShowModalState) => {
@@ -80,14 +79,14 @@ watch(isModalOpen, (newShowModalState) => {
 </script>
 
 <template>
-  <LayoutWalletDetails v-if="walletStore.isUserWalletConnected"/>
+  <LayoutWalletDetails v-if="walletStore.isUserWalletConnected" />
   <Button v-else @click="handleClick"
-          class="bg-blue-500 text-blue-900 font-mono tracking-wide font-bold text-lg whitespace-nowrap">
+    class="bg-blue-500 text-blue-900 font-mono tracking-wide font-bold text-lg whitespace-nowrap">
     Connect Wallet
   </Button>
 
   <AppModal :is-open="isModalOpen" :is-loading="isLoading" :ignore="['.v-popper__popper']" is-md
-            @modal:closed="onCloseModal">
+    @modal:closed="onCloseModal">
     <template #title>
       <h3 v-if="walletModalType === WalletModalType.Trezor">
         Connect Using Trezor
@@ -100,18 +99,18 @@ watch(isModalOpen, (newShowModalState) => {
       </h3>
     </template>
 
-    <LayoutWalletLedger v-if="walletModalType === WalletModalType.Ledger"/>
-    <LayoutWalletTrezor v-else-if="walletModalType === WalletModalType.Trezor"/>
+    <LayoutWalletLedger v-if="walletModalType === WalletModalType.Ledger" />
+    <LayoutWalletTrezor v-else-if="walletModalType === WalletModalType.Trezor" />
     <ul v-else class="divide-y divide-gray-800 border-gray-700 rounded-lg max-h-[65vh]">
-      <LayoutWalletConnectWalletMetamask/>
-      <LayoutWalletConnectWalletKeplr/>
-      <LayoutWalletConnectWalletNinji/>
-      <LayoutWalletConnectWalletLedger @click="onWalletModalTypeChange"/>
-      <LayoutWalletConnectWalletTrezor @click="onWalletModalTypeChange"/>
-      <LayoutWalletConnectWalletTrustWallet/>
-      <LayoutWalletConnectWalletLeap/>
-      <LayoutWalletConnectWalletCosmostation/>
-      <LayoutWalletConnectWalletTorus/>
+      <LayoutWalletConnectWalletMetamask />
+      <LayoutWalletConnectWalletKeplr />
+      <LayoutWalletConnectWalletNinji />
+      <LayoutWalletConnectWalletLedger @click="onWalletModalTypeChange" />
+      <LayoutWalletConnectWalletTrezor @click="onWalletModalTypeChange" />
+      <LayoutWalletConnectWalletTrustWallet />
+      <LayoutWalletConnectWalletLeap />
+      <LayoutWalletConnectWalletCosmostation />
+      <LayoutWalletConnectWalletTorus />
     </ul>
   </AppModal>
 </template>
